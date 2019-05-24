@@ -4,12 +4,25 @@ using System.Reflection;
 
 namespace PingDong.Testing
 {
-    public class PropertiesComparer<T> : IEqualityComparer<T>
+    /// <summary>
+    /// Compare two flat objects
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class FlatObjectPropertiesComparer<T> : IEqualityComparer<T>
     {
         public bool Equals(T expected, T actual)
         {
-            if (EqualityComparer<T>.Default.Equals(expected, default) ||
+            // Null Null
+            if (EqualityComparer<T>.Default.Equals(expected, default) &&
                 EqualityComparer<T>.Default.Equals(actual, default))
+                return true;
+
+            // Null Object
+            if (EqualityComparer<T>.Default.Equals(expected, default))
+                return false;
+
+            // Object Null
+            if (EqualityComparer<T>.Default.Equals(actual, default))
                 return false;
 
             if (ReferenceEquals(expected, actual))
@@ -22,19 +35,13 @@ namespace PingDong.Testing
                 var expectedValue = prop.GetValue(expected, null);
                 var actualValue = prop.GetValue(actual, null);
 
-                if (expectedValue.GetType().IsClass)
-                {
-                }
-                else
-                {
-                    if (!Equals(expectedValue, actualValue))
-                        return false;
-                }
+                if (!Equals(expectedValue, actualValue))
+                    return false;
             }
 
             return true;
         }
-
+        
         public int GetHashCode(T parameterValue)
         {
             return Tuple.Create(parameterValue).GetHashCode();
