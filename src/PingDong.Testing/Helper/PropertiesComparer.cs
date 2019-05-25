@@ -102,13 +102,28 @@ namespace PingDong.Testing
         {
             var comparer = valueA as IComparable;
 
+            if (valueA == null && valueB == null)
+                return true;
+
             if (valueA == null && valueB != null || valueA != null && valueB == null)
                 return false; // one of the values is null
 
             if (comparer != null && comparer.CompareTo(valueB) != 0)
                 return false; // the comparison using IComparable failed
 
-            return Equals(valueA, valueB);
+            var valueType = valueA.GetType();
+
+            if (valueType.IsGenericType)
+            {
+                if (!AreEqual(valueA, valueB))
+                    return false;
+            }
+            else
+            {
+                return Equals(valueA, valueB);
+            }
+
+            return true;
         }
     }
 }
