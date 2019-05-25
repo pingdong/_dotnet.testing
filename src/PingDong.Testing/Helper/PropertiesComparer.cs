@@ -14,11 +14,7 @@ namespace PingDong.Testing
     {
         public bool Equals(T expected, T actual)
         {
-            if (!EqualityComparer<T>.Default.Equals(expected, default) 
-                && !EqualityComparer<T>.Default.Equals(expected, default))
-                return AreEqual(expected, actual);
-
-            return object.Equals(expected, actual);
+            return AreEqual(expected, actual);
         }
         
         public int GetHashCode(T parameterValue)
@@ -28,10 +24,14 @@ namespace PingDong.Testing
 
         private static bool AreEqual(object objectA, object objectB)
         {
-            var objectType = objectA.GetType();
+            // if any side is null
+            if (objectA == null || objectB == null)
+                return Equals(objectA, objectB);
 
+            // both sides are not null
+            var objectType = objectA.GetType();
             var properties = objectType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                                        .Where(p => p.CanRead);
+                .Where(p => p.CanRead);
 
             foreach (var propertyInfo in properties)
             {
@@ -44,9 +44,9 @@ namespace PingDong.Testing
                     if (!AreValuesEqual(valueA, valueB))
                         return false;
                 }
-                
+
                 // if it implements IEnumerable, then scan any items
-                if (typeof(IEnumerable).IsAssignableFrom(propertyInfo.PropertyType))
+                else if (typeof(IEnumerable).IsAssignableFrom(propertyInfo.PropertyType))
                 {
                     // null check
                     if ((valueA == null && valueB != null) || (valueA != null && valueB == null))
@@ -54,8 +54,8 @@ namespace PingDong.Testing
 
                     if (valueA != null)
                     {
-                        var collectionItems1 = ((IEnumerable)valueA).Cast<object>();
-                        var collectionItems2 = ((IEnumerable)valueB).Cast<object>();
+                        var collectionItems1 = ((IEnumerable) valueA).Cast<object>();
+                        var collectionItems2 = ((IEnumerable) valueB).Cast<object>();
                         var count1 = collectionItems1.Count();
                         var count2 = collectionItems2.Count();
 
@@ -83,12 +83,11 @@ namespace PingDong.Testing
                     }
                 }
 
-                if (propertyInfo.PropertyType.IsClass)
+                else if (propertyInfo.PropertyType.IsClass)
                 {
                     if (!AreEqual(propertyInfo.GetValue(objectA, null), propertyInfo.GetValue(objectB, null)))
                         return false;
                 }
-                
             }
 
             return true;

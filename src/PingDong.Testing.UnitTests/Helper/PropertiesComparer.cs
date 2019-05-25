@@ -35,7 +35,7 @@ namespace PingDong.Testing
         {
             var s1 = new string[] { };
             var s2 = new string[] { };
-            Assert.Equal(s1, s2, new PropertiesComparer<string[]>());
+            Assert.Equal(s1, s2, new PropertiesComparer<string>());
         }
 
         [Fact]
